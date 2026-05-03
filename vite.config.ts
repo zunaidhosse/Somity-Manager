@@ -10,9 +10,9 @@ export default defineConfig(({mode}) => {
     plugins: [
       react(), 
       tailwindcss(),
-      VitePWA({
+    VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+        includeAssets: ['mask-icon.svg'],
         manifest: {
           name: 'SomitiPro - Loan Management',
           short_name: 'SomitiPro',
@@ -20,27 +20,25 @@ export default defineConfig(({mode}) => {
           theme_color: '#0f172a',
           background_color: '#ffffff',
           display: 'standalone',
+          start_url: '/',
+          scope: '/',
           icons: [
             {
-              src: 'pwa-192x192.png',
-              sizes: '192x192',
-              type: 'image/png'
+              src: 'mask-icon.svg',
+              sizes: 'any',
+              type: 'image/svg+xml',
+              purpose: 'any'
             },
             {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png'
-            },
-            {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any maskable'
+              src: 'mask-icon.svg',
+              sizes: 'any',
+              type: 'image/svg+xml',
+              purpose: 'maskable'
             }
           ]
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+          globPatterns: ['**/*.{js,css,html,svg}']
         }
       })
     ],

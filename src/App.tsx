@@ -36,8 +36,11 @@ import {
   BarChart3,
   TrendingUp,
   PieChart,
-  ArrowUpRight
+  ArrowUpRight,
+  Share2,
+  LifeBuoy
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Member, type Loan, type Installment } from './db';
 import { format, addWeeks, addMonths, startOfDay } from 'date-fns';
@@ -130,9 +133,15 @@ export default function App() {
 
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [showInstallPopup, setShowInstallPopup] = useState(false);
+  const [showShareQR, setShowShareQR] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // Detect iOS
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOS(isIOSDevice);
+
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       setInstallPrompt(e);
@@ -143,9 +152,22 @@ export default function App() {
       }
     };
 
+    if (isIOS && !localStorage.getItem('pwa_install_dismissed')) {
+      const isStandalone = (window.navigator as any).standalone === true;
+      if (!isStandalone) {
+        setShowInstallPopup(true);
+      }
+    }
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('online', () => setIsOnline(true));
     window.addEventListener('offline', () => setIsOnline(false));
+
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+      setInstallPrompt(null);
+      setShowInstallPopup(false);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -308,6 +330,32 @@ export default function App() {
               accept=".json"
             />
           </div>
+
+          <div className="pt-8 border-t border-slate-800 space-y-3">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Support & Share</p>
+            <a 
+              href="https://zunaidhosse.github.io/My-contact/"
+              target="_blank"
+              rel="noreferrer"
+              className="w-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-orange-400 hover:text-orange-300 transition-all text-left"
+            >
+              <LifeBuoy size={12} /> Helpline
+            </a>
+            <button 
+              onClick={() => { setShowShareQR(true); setIsMobileMenuOpen(false); }}
+              className="w-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-purple-400 hover:text-purple-300 transition-all text-left"
+            >
+              <Share2 size={12} /> Share App
+            </button>
+            {installPrompt && (
+              <button 
+                onClick={() => { handleInstallClick(); setIsMobileMenuOpen(false); }}
+                className="w-full flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-400 hover:text-emerald-300 transition-all text-left animate-pulse"
+              >
+                <Download size={12} /> Install App
+              </button>
+            )}
+          </div>
         </nav>
         
         <div className="p-8">
@@ -448,7 +496,7 @@ export default function App() {
 
       {/* PWA Install Popup */}
       <AnimatePresence>
-        {showInstallPopup && installPrompt && (
+        {showInstallPopup && (installPrompt || isIOS) && (
           <motion.div 
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -457,20 +505,32 @@ export default function App() {
           >
             <div className="flex items-start gap-4">
               <div className="bg-slate-900 text-white p-3 rotate-3 brutalist-shadow-emerald">
-                <Download size={24} />
+                {isIOS ? <Share2 size={24} /> : <Download size={24} />}
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-black uppercase tracking-tight">Install App</h3>
-                <p className="text-[10px] text-slate-500 font-bold mt-1 leading-relaxed">অফলাইনে ব্যবহার করতে এবং দ্রুত এক্সেস পেতে অ্যাপটি ইন্সটল করুন।</p>
+                <h3 className="text-sm font-black uppercase tracking-tight">
+                  {isIOS ? 'Install on iPhone' : 'Install App'}
+                </h3>
+                <p className="text-[10px] text-slate-500 font-bold mt-1 leading-relaxed">
+                  {isIOS 
+                    ? 'ট্যাপ করুন "Share" তারপর "Add to Home Screen" এ ক্লিক করুন অফলাইনে ব্যবহার করতে।' 
+                    : 'অফলাইনে ব্যবহার করতে এবং দ্রুত এক্সেস পেতে অ্যাপটি ইন্সটল করুন।'}
+                </p>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
-              <button 
-                onClick={handleInstallClick}
-                className="flex-1 bg-slate-900 text-white py-3 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all active:translate-y-1"
-              >
-                INSTALL NOW
-              </button>
+              {!isIOS ? (
+                <button 
+                  onClick={handleInstallClick}
+                  className="flex-1 bg-slate-900 text-white py-3 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 transition-all active:translate-y-1"
+                >
+                  INSTALL NOW
+                </button>
+              ) : (
+                <div className="flex-1 text-[10px] font-black uppercase tracking-widest text-slate-400 py-3 text-center border-2 border-dashed border-slate-200">
+                  Follow iOS Steps Above
+                </div>
+              )}
               <button 
                 onClick={handleDismissInstall}
                 className="px-4 py-3 border-2 border-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
@@ -500,6 +560,42 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Share QR Modal */}
+      {showShareQR && (
+        <Modal 
+          onClose={() => setShowShareQR(false)} 
+          title="Share App"
+        >
+        <div className="flex flex-col items-center py-8">
+          <div className="bg-white p-6 border-4 border-slate-900 brutalist-shadow-slate rotate-1 mb-8">
+            <QRCodeSVG 
+              value="https://somity-manager.vercel.app/" 
+              size={200}
+              level="H"
+              includeMargin={true}
+            />
+          </div>
+          <p className="text-sm font-black uppercase tracking-tight text-center max-w-xs">
+            এই QR কোডটি স্ক্যান করে অ্যাপটি অন্যদের সাথে শেয়ার করুন।
+          </p>
+          <div className="mt-8 flex flex-col gap-4 w-full">
+            <div className="p-4 bg-slate-50 border-2 border-slate-900 font-mono text-[10px] break-all">
+              https://somity-manager.vercel.app/
+            </div>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText('https://somity-manager.vercel.app/');
+                alert('লিংক কপি করা হয়েছে!');
+              }}
+              className="w-full bg-slate-900 text-white py-4 text-xs font-black uppercase tracking-widest hover:bg-emerald-500 transition-all"
+            >
+              Copy Link
+            </button>
+          </div>
+        </div>
+      </Modal>
+      )}
     </div>
   );
 }
