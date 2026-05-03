@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Hind Siliguri", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-emerald-200;
+  }
+}
+
+.brutalist-shadow-emerald {
+  box-shadow: 4px 4px 0px #064e3b;
+}
+
+.brutalist-shadow-slate {
+  box-shadow: 4px 4px 0px #1e293b;
+}
+
+.brutalist-card {
+  @apply bg-white border-2 border-slate-900 rounded-none;
+}
