@@ -16,8 +16,8 @@ export default defineConfig(({mode}) => {
         manifest: {
           name: 'SomitiPro - Loan Management',
           short_name: 'SomitiPro',
-          description: 'A professional loan and installment management system.',
-          theme_color: '#0f172a',
+          description: 'Professional Micro-Finance Management System',
+          theme_color: '#1fb1ae',
           background_color: '#ffffff',
           display: 'standalone',
           start_url: '/',
@@ -34,18 +34,6 @@ export default defineConfig(({mode}) => {
               sizes: 'any',
               type: 'image/svg+xml',
               purpose: 'maskable'
-            },
-            {
-              src: 'app-icon-192.png',
-              sizes: '192x192',
-              type: 'image/png',
-              purpose: 'any'
-            },
-            {
-              src: 'app-icon-512.png',
-              sizes: '512x512',
-              type: 'image/png',
-              purpose: 'any'
             }
           ]
         },
